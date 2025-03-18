@@ -131,21 +131,20 @@ function displayPlayerCards(player) {
 
 //     playerTotal.innerHTML = 'Total: ' + calculateTotal(playerCards);
 // }
-
 function startGame() {
     if (gameInProgress) return;
+
+    // Show the "Continue" button after the start button is clicked
+    document.getElementById('continue-btn').style.display = 'inline-block';
 
     // Reset scores (optional)
     player1Score = 0;
     player2Score = 0;
     updateScoreboard();
 
-    // Start game setup...
-
     // Show loading animation
     const loading = document.getElementById('loading');
     loading.style.display = 'block';
-
 
     setTimeout(() => {
         // Hide loading after 2 seconds
@@ -192,6 +191,65 @@ function startGame() {
     }, 2000); // 2-second delay for the loading animation
 }
 
+// function startGame() {
+//     if (gameInProgress) return;
+
+//     // Reset scores (optional)
+//     player1Score = 0;
+//     player2Score = 0;
+//     updateScoreboard();
+
+//     // Start game setup...
+
+//     // Show loading animation
+//     const loading = document.getElementById('loading');
+//     loading.style.display = 'block';
+
+
+//     setTimeout(() => {
+//         // Hide loading after 2 seconds
+//         loading.style.display = 'none';
+
+//         shuffledDeck = shuffleDeck([...deck]);
+//         player1Cards = [];
+//         player2Cards = [];
+
+//         resultText.innerHTML = '';
+//         resultText.classList.remove('winner', 'loser');
+
+//         document.getElementById('player1-cards').innerHTML = '';
+//         document.getElementById('player2-cards').innerHTML = '';
+//         document.getElementById('player1-total').innerHTML = 'Total: 0';
+//         document.getElementById('player2-total').innerHTML = 'Total: 0';
+
+//         document.getElementById('hit-btn-1').style.display = 'inline-block';
+//         document.getElementById('stand-btn-1').style.display = 'inline-block';
+//         document.getElementById('hit-btn-2').style.display = 'inline-block';
+//         document.getElementById('stand-btn-2').style.display = 'inline-block';
+
+//         document.getElementById('hit-btn-1').disabled = false;
+//         document.getElementById('stand-btn-1').disabled = false;
+//         document.getElementById('hit-btn-2').disabled = true;
+//         document.getElementById('stand-btn-2').disabled = true;
+
+//         player1Cards.push(shuffledDeck.pop(), shuffledDeck.pop());
+//         player2Cards.push(shuffledDeck.pop(), shuffledDeck.pop());
+
+//         displayPlayerCards(1);
+//         displayPlayerCards(2);
+
+//         if (calculateTotal(player1Cards) === 9) {
+//             declareImmediateWinner(1);
+//         } else if (calculateTotal(player2Cards) === 9) {
+//             declareImmediateWinner(2);
+//         } else {
+//             document.getElementById('player1').classList.add('active');
+//             document.getElementById('player2').classList.remove('active');
+//             player1Turn = true;
+//             gameInProgress = true;
+//         }
+//     }, 2000); // 2-second delay for the loading animation
+// }
 function continueGame() {
     if (gameInProgress) return; // Prevent starting a new round if one is ongoing
 
@@ -234,6 +292,49 @@ function continueGame() {
         gameInProgress = true;
     }
 }
+
+// function continueGame() {
+//     if (gameInProgress) return; // Prevent starting a new round if one is ongoing
+
+//     shuffledDeck = shuffleDeck([...deck]);
+//     player1Cards = [];
+//     player2Cards = [];
+
+//     resultText.innerHTML = '';
+//     resultText.classList.remove('winner', 'loser');
+
+//     document.getElementById('player1-cards').innerHTML = '';
+//     document.getElementById('player2-cards').innerHTML = '';
+//     document.getElementById('player1-total').innerHTML = 'Total: 0';
+//     document.getElementById('player2-total').innerHTML = 'Total: 0';
+
+//     document.getElementById('hit-btn-1').style.display = 'inline-block';
+//     document.getElementById('stand-btn-1').style.display = 'inline-block';
+//     document.getElementById('hit-btn-2').style.display = 'inline-block';
+//     document.getElementById('stand-btn-2').style.display = 'inline-block';
+
+//     document.getElementById('hit-btn-1').disabled = false;
+//     document.getElementById('stand-btn-1').disabled = false;
+//     document.getElementById('hit-btn-2').disabled = true;
+//     document.getElementById('stand-btn-2').disabled = true;
+
+//     player1Cards.push(shuffledDeck.pop(), shuffledDeck.pop());
+//     player2Cards.push(shuffledDeck.pop(), shuffledDeck.pop());
+
+//     displayPlayerCards(1);
+//     displayPlayerCards(2);
+
+//     if (calculateTotal(player1Cards) === 9) {
+//         declareImmediateWinner(1);
+//     } else if (calculateTotal(player2Cards) === 9) {
+//         declareImmediateWinner(2);
+//     } else {
+//         document.getElementById('player1').classList.add('active');
+//         document.getElementById('player2').classList.remove('active');
+//         player1Turn = true;
+//         gameInProgress = true;
+//     }
+// }
 
 function hit(player) {
     let playerCards = player === 1 ? player1Cards : player2Cards;
@@ -320,10 +421,39 @@ function determineWinner() {
 
     updateScoreboard();
 
+    // Disable the action buttons for both players
     document.getElementById('hit-btn-2').disabled = true;
     document.getElementById('stand-btn-2').disabled = true;
+
+    // Show the "Continue" button after the round ends
+    document.getElementById('continue-btn').style.display = 'inline-block';
+
     gameInProgress = false;
 }
+
+// function determineWinner() {
+//     const player1Total = calculateTotal(player1Cards);
+//     const player2Total = calculateTotal(player2Cards);
+
+//     if (player1Total > player2Total) {
+//         resultText.innerHTML = '🎉 Player 1 Wins!';
+//         resultText.classList.add('winner');
+//         player1Score++;
+//     } else if (player2Total > player1Total) {
+//         resultText.innerHTML = '🎉 Player 2 Wins!';
+//         resultText.classList.add('winner');
+//         player2Score++;
+//     } else {
+//         resultText.innerHTML = '🤝 It\'s a Tie!';
+//         resultText.classList.add('loser');
+//     }
+
+//     updateScoreboard();
+
+//     document.getElementById('hit-btn-2').disabled = true;
+//     document.getElementById('stand-btn-2').disabled = true;
+//     gameInProgress = false;
+// }
 
 // Event Listeners
 startButton.addEventListener('click', startGame);
@@ -339,6 +469,7 @@ window.onload = function () {
     document.getElementById('stand-btn-1').style.display = 'none';
     document.getElementById('hit-btn-2').style.display = 'none';
     document.getElementById('stand-btn-2').style.display = 'none';
+    document.getElementById('continue-btn').style.display = 'none';
 };
 
 
