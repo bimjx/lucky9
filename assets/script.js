@@ -1,4 +1,5 @@
 const startButton = document.getElementById('start-btn');
+const continueButton = document.getElementById('continue-btn');
 const resultText = document.getElementById('result');
 
 let player1Cards = [];
@@ -42,8 +43,6 @@ function calculateTotal(hand) {
     const sum = hand.reduce((total, card) => total + cardValues[card.value], 0);
     return sum % 10;
 }
-
-// Function to create and display styled card elements
 function displayPlayerCards(player) {
     const playerCards = player === 1 ? player1Cards : player2Cards;
     const playerTotal = document.getElementById(`player${player}-total`);
@@ -51,47 +50,87 @@ function displayPlayerCards(player) {
 
     playerCardsDiv.innerHTML = '';
 
-    playerCards.forEach(card => {
+    playerCards.forEach((card, index) => {
         const cardElement = document.createElement('div');
-        cardElement.classList.add('card');
+        cardElement.classList.add('card', 'back-card'); 
 
-        //flipping card
-        const isFaceDown = false;
+        setTimeout(() => {
+            cardElement.classList.remove('back-card'); 
+            cardElement.classList.add('flip'); 
 
-        if (isFaceDown) {
-            cardElement.classList.add('back-card');
-        } else {
-            if (card.suit === '♥' || card.suit === '♦') {
-                cardElement.classList.add('red');
-            } else {
-                cardElement.classList.add('black');
-            }
+            setTimeout(() => {
+                cardElement.innerHTML = `
+                    <span class="top-left">${card.value}</span>
+                    <span class="suit">${card.suit}</span>
+                    <span class="bottom-right">${card.value}</span>
+                `;
 
-            cardElement.innerHTML = `
-            <span class="top-left">${card.value}</span>
-                <span class="suit">${card.suit}</span>
-                <span class="bottom-right">${card.value}</span>
-            `;
-        }
-
-        // if (card.suit === '♥' || card.suit === '♦') {
-        //     cardElement.classList.add('red');
-        // } else {
-        //     cardElement.classList.add('black');
-        // }
-
-        // cardElement.setAttribute('data-value', card.value + card.suit);
-        // cardElement.innerHTML = `
-        //     <span class="top-left">${card.value}</span>
-        //     <span class="suit">${card.suit}</span>
-        //     <span class="bottom-right">${card.value}</span>
-        // `;
+                
+                if (card.suit === '♥' || card.suit === '♦') {
+                    cardElement.classList.add('red');
+                } else {
+                    cardElement.classList.add('black');
+                }
+            }, 300); 
+        }, index * 300); 
 
         playerCardsDiv.appendChild(cardElement);
     });
 
-    playerTotal.innerHTML = 'Total: ' + calculateTotal(playerCards);
+    setTimeout(() => {
+        playerTotal.innerHTML = 'Total: ' + calculateTotal(playerCards);
+    }, playerCards.length * 300);
 }
+
+// Function to create and display styled card elements
+// function displayPlayerCards(player) {
+//     const playerCards = player === 1 ? player1Cards : player2Cards;
+//     const playerTotal = document.getElementById(`player${player}-total`);
+//     const playerCardsDiv = document.getElementById(`player${player}-cards`);
+
+//     playerCardsDiv.innerHTML = '';
+
+//     playerCards.forEach(card => {
+//         const cardElement = document.createElement('div');
+//         cardElement.classList.add('card');
+
+//         //flipping card
+//         const isFaceDown = false;
+
+//         if (isFaceDown) {
+//             cardElement.classList.add('back-card');
+//         } else {
+//             if (card.suit === '♥' || card.suit === '♦') {
+//                 cardElement.classList.add('red');
+//             } else {
+//                 cardElement.classList.add('black');
+//             }
+
+//             cardElement.innerHTML = `
+//             <span class="top-left">${card.value}</span>
+//                 <span class="suit">${card.suit}</span>
+//                 <span class="bottom-right">${card.value}</span>
+//             `;
+//         }
+
+//         if (card.suit === '♥' || card.suit === '♦') {
+//             cardElement.classList.add('red');
+//         } else {
+//             cardElement.classList.add('black');
+//         }
+
+//         cardElement.setAttribute('data-value', card.value + card.suit);
+//         cardElement.innerHTML = `
+//             <span class="top-left">${card.value}</span>
+//             <span class="suit">${card.suit}</span>
+//             <span class="bottom-right">${card.value}</span>
+//         `;
+
+//         playerCardsDiv.appendChild(cardElement);
+//     });
+
+//     playerTotal.innerHTML = 'Total: ' + calculateTotal(playerCards);
+// }
 
 function startGame() {
     if (gameInProgress) return;
@@ -153,6 +192,48 @@ function startGame() {
     }, 2000); // 2-second delay for the loading animation
 }
 
+function continueGame() {
+    if (gameInProgress) return; // Prevent starting a new round if one is ongoing
+
+    shuffledDeck = shuffleDeck([...deck]);
+    player1Cards = [];
+    player2Cards = [];
+
+    resultText.innerHTML = '';
+    resultText.classList.remove('winner', 'loser');
+
+    document.getElementById('player1-cards').innerHTML = '';
+    document.getElementById('player2-cards').innerHTML = '';
+    document.getElementById('player1-total').innerHTML = 'Total: 0';
+    document.getElementById('player2-total').innerHTML = 'Total: 0';
+
+    document.getElementById('hit-btn-1').style.display = 'inline-block';
+    document.getElementById('stand-btn-1').style.display = 'inline-block';
+    document.getElementById('hit-btn-2').style.display = 'inline-block';
+    document.getElementById('stand-btn-2').style.display = 'inline-block';
+
+    document.getElementById('hit-btn-1').disabled = false;
+    document.getElementById('stand-btn-1').disabled = false;
+    document.getElementById('hit-btn-2').disabled = true;
+    document.getElementById('stand-btn-2').disabled = true;
+
+    player1Cards.push(shuffledDeck.pop(), shuffledDeck.pop());
+    player2Cards.push(shuffledDeck.pop(), shuffledDeck.pop());
+
+    displayPlayerCards(1);
+    displayPlayerCards(2);
+
+    if (calculateTotal(player1Cards) === 9) {
+        declareImmediateWinner(1);
+    } else if (calculateTotal(player2Cards) === 9) {
+        declareImmediateWinner(2);
+    } else {
+        document.getElementById('player1').classList.add('active');
+        document.getElementById('player2').classList.remove('active');
+        player1Turn = true;
+        gameInProgress = true;
+    }
+}
 
 function hit(player) {
     let playerCards = player === 1 ? player1Cards : player2Cards;
@@ -250,6 +331,8 @@ document.getElementById('hit-btn-1').addEventListener('click', () => hit(1));
 document.getElementById('stand-btn-1').addEventListener('click', () => stand(1));
 document.getElementById('hit-btn-2').addEventListener('click', () => hit(2));
 document.getElementById('stand-btn-2').addEventListener('click', () => stand(2));
+
+continueButton.addEventListener('click', continueGame);
 
 window.onload = function () {
     document.getElementById('hit-btn-1').style.display = 'none';
