@@ -58,8 +58,8 @@ style.innerHTML = `
         transform: rotate(180deg);
     }
 `;
-document.head.appendChild(style);
 
+document.head.appendChild(style);
 
 
 
@@ -80,6 +80,7 @@ const cardValues = {
 const suits = ['♠', '♥', '♦', '♣'];
 const deck = [];
 
+//to create 52 cards
 for (const suit of suits) {
     for (let value = 2; value <= 10; value++) {
         deck.push({ value, suit });
@@ -90,13 +91,14 @@ for (const suit of suits) {
     deck.push({ value: 'A', suit });
 }
 
+//Makes a copy of the deck and passes it to a shuffleDeck() function 
 let shuffledDeck = shuffleDeck([...deck]);
 
 // Shuffle the deck
 function shuffleDeck(deck) {
     for (let i = deck.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [deck[i], deck[j]] = [deck[j], deck[i]];
+        [deck[i], deck[j]] = [deck[j], deck[i]]; //swaps element from i and j
     }
     return deck;
 }
@@ -136,6 +138,7 @@ function displayPlayerCards(player) {
     });
 
     playerTotal.innerHTML = 'Total: ' + calculateTotal(playerCards);
+    //Displays the total score inside the player-total element
 }
 
 
@@ -164,7 +167,9 @@ function hit(player) {
         return;
     }
 
-    if (player === 2 && total === 9) {
+
+
+    if (player === 1 && total === 9 || player === 2 && total === 9) { //!1
         // If Player 2 hits and also reaches 9, it's a tie
         resultText.innerHTML = '🤝 It\'s a Tie!';
         resultText.classList.add('loser');
@@ -182,15 +187,16 @@ function hit(player) {
 }
 
 
-function startTurnTimer(player) {
+function startTurnTimer(player) { //! 2
     clearTimeout(turnTimer); // Clear previous timer
+
     turnTimer = setTimeout(() => {
         stand(player); // Auto-stand if time runs out
     }, TURN_TIME_LIMIT);
 }
-function stand(player) {
+function stand(player) { //! 3
     clearTimeout(turnTimer); // Clear timer when player stands
-    
+
     if (player === 1) {
         document.getElementById('hit-btn-1').disabled = true;
         document.getElementById('stand-btn-1').disabled = true;
@@ -221,19 +227,20 @@ function declareImmediateWinner(player) {
     document.getElementById('continue-btn').style.display = 'inline-block';
 }
 
-function determineWinner() {
+function determineWinner() { //! 4
     const player1Total = calculateTotal(player1Cards);
     const player2Total = calculateTotal(player2Cards);
-
+    console.log("score1: ", player1Total)
+    console.log("score2 ", player2Total)
     if (player1Total > player2Total) {
         resultText.innerHTML = '🎉 Player 1 Wins!';
         resultText.classList.add('winner');
         player1Score++;
-    } else if (player2Total > player1Total) {
+    } else if (player2Total > player1Total) { //! 5
         resultText.innerHTML = '🎉 Player 2 Wins!';
         resultText.classList.add('winner');
         player2Score++;
-    } else if (player1Total === player2Total) {  
+    } else if (player1Total === player2Total) {
         resultText.innerHTML = '🤝 It\'s a Tie!';
         resultText.classList.add('loser');
     }
@@ -248,8 +255,10 @@ function determineWinner() {
 
 
 function startGame(isNewGame = true) {
-    if (gameInProgress) return;
-
+    startButton.setAttribute('disabled', 'disabled')
+    console.log("going in")
+    // if (gameInProgress) return; //!
+    console.log("inside")
     clearTimeout(turnTimer); // Reset timer on new game
     document.getElementById('continue-btn').style.display = 'none';
     const loading = document.getElementById('loading');
@@ -277,11 +286,10 @@ function startGame(isNewGame = true) {
         cardBack.classList.add('card-back');
         cardBack.style.animationDelay = `${i * 0.2}s`; // Delayed effect for a smooth shuffle
         shuffleOverlay.appendChild(cardBack);
+        //Adds each CB element to the SO.
     }
 
     document.body.appendChild(shuffleOverlay);
-
-    
 
     setTimeout(() => {
         document.body.removeChild(shuffleOverlay);
@@ -298,53 +306,58 @@ function startGame(isNewGame = true) {
         document.getElementById('player2-total').innerHTML = 'Total: ?';
         setTimeout(() => {
 
-        document.getElementById('player1-cards').innerHTML = '';
-        document.getElementById('player2-cards').innerHTML = '';
-        document.getElementById('player1-total').innerHTML = 'Total: 0';
-        document.getElementById('player2-total').innerHTML = 'Total: 0';
+            document.getElementById('player1-cards').innerHTML = '';
+            document.getElementById('player2-cards').innerHTML = '';
+            document.getElementById('player1-total').innerHTML = 'Total: 0';
+            document.getElementById('player2-total').innerHTML = 'Total: 0';
 
-        document.getElementById('hit-btn-1').style.display = 'inline-block';
-        document.getElementById('stand-btn-1').style.display = 'inline-block';
-        document.getElementById('hit-btn-2').style.display = 'inline-block';
-        document.getElementById('stand-btn-2').style.display = 'inline-block';
+            document.getElementById('hit-btn-1').style.display = 'inline-block';
+            document.getElementById('stand-btn-1').style.display = 'inline-block';
+            document.getElementById('hit-btn-2').style.display = 'inline-block';
+            document.getElementById('stand-btn-2').style.display = 'inline-block';
 
-        document.getElementById('hit-btn-1').disabled = false;
-        document.getElementById('stand-btn-1').disabled = false;
-        document.getElementById('hit-btn-2').disabled = true;
-        document.getElementById('stand-btn-2').disabled = true;
+            document.getElementById('hit-btn-1').disabled = false;
+            document.getElementById('stand-btn-1').disabled = false;
+            document.getElementById('hit-btn-2').disabled = true;
+            document.getElementById('stand-btn-2').disabled = true;
 
-        if (isNewGame) {
-            player1Score = 0;
-            player2Score = 0;
-        }
+            if (isNewGame) {
+                player1Score = 0;
+                player2Score = 0;
+            }
 
-        updateScoreDisplay();
+            updateScoreDisplay();
 
-        player1Cards.push(shuffledDeck.pop(), shuffledDeck.pop());
-        player2Cards.push(shuffledDeck.pop(), shuffledDeck.pop());
+            player1Cards.push(shuffledDeck.pop(), shuffledDeck.pop());
+            player2Cards.push(shuffledDeck.pop(), shuffledDeck.pop());
 
-        displayPlayerCards(1);
-        displayPlayerCards(2);
+            displayPlayerCards(1);
+            displayPlayerCards(2);
 
-        let player1Total = calculateTotal(player1Cards);
-        let player2Total = calculateTotal(player2Cards);
+            let player1Total = calculateTotal(player1Cards);
+            let player2Total = calculateTotal(player2Cards);
 
-        if (player1Total === 9) {
-            declareImmediateWinner(1);
-            return;
-        } else if (player2Total === 9) {
-            declareImmediateWinner(2);
-            return;
-        }
+            if (player1Total === 9) {
+                declareImmediateWinner(1);
+                return;
+            } else if (player2Total === 9) {
+                declareImmediateWinner(2);
+                return;
+            }
 
-        
 
-        document.getElementById('player1').classList.add('active');
-        document.getElementById('player2').classList.remove('active');
-        player1Turn = true;
-        gameInProgress = true;
-    }, 3000); // Reveal cards after 3 seconds
-}, 2000); // Shuffle animation lasts 2 seconds
+            let player1DOM = document.getElementById('player1')
+            player1DOM.classList.add('active');
+            document.getElementById('player2').classList.remove('active');
+            player1Turn = true;
+            gameInProgress = true;
+        }, 3000); // Reveal cards after 3 seconds
+    }, 2000) // Shuffle animation lasts 2 seconds
+
+    setTimeout(function () {
+        startButton.removeAttribute('disabled')
+        console.log('remove')
+    }, 5000)
 }
 
 
