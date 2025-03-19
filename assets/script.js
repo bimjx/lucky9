@@ -68,8 +68,6 @@ const startButton = document.getElementById('start-btn');
     let player1Turn = true;
     let gameInProgress = false;
     let turnTimer;
-    
-
 
     let player1Score = 0; // Stores Player 1's score
     let player2Score = 0; // Stores Player 2's score
@@ -115,52 +113,58 @@ const startButton = document.getElementById('start-btn');
     
         playerCardsDiv.innerHTML = '';
     
-        // Create two back-facing cards
-        for (let i = 0; i < 2; i++) {
-            const cardBack = document.createElement('div');
-            cardBack.classList.add('card-back');
-            playerCardsDiv.appendChild(cardBack);
+        if (playerCards.length === 2) {
+            // Show two back-facing cards initially
+            for (let i = 0; i < 2; i++) {
+                const cardBack = document.createElement('div');
+                cardBack.classList.add('card-back');
+                playerCardsDiv.appendChild(cardBack);
+            }
+            playerTotal.innerHTML = 'Total: ?';
+    
+            // Reveal button to show initial two cards
+            const revealBtn = document.createElement('button');
+            revealBtn.textContent = 'Reveal Cards';
+            revealBtn.classList.add('reveal-btn');
+            revealBtn.onclick = () => {
+                showAllCards(player);
+                revealBtn.disabled = true; // Disable button after use
+            };
+            playerCardsDiv.appendChild(revealBtn);
+        } else {
+            // If third card is drawn, reveal all three automatically
+            showAllCards(player);
         }
-    
-        // Hide points initially
-        playerTotal.innerHTML = 'Total: ?';
-    
-        // Add a Reveal Cards button
-        const revealBtn = document.createElement('button');
-        revealBtn.textContent = 'Reveal Cards';
-        revealBtn.classList.add('reveal-btn');
-        revealBtn.onclick = () => {
-            playerCardsDiv.innerHTML = ''; // Clear back cards
-    
-            playerCards.forEach(card => {
-                const cardElement = document.createElement('div');
-                cardElement.classList.add('card');
-    
-                if (card.suit === '♥' || card.suit === '♦') {
-                    cardElement.classList.add('red');
-                } else {
-                    cardElement.classList.add('black');
-                }
-    
-                cardElement.innerHTML = `
-                    <span class="top-left">${card.value}</span>
-                    <span class="suit">${card.suit}</span>
-                    <span class="bottom-right">${card.value}</span>
-                `;
-    
-                playerCardsDiv.appendChild(cardElement);
-            });
-    
-            // Reveal points
-            playerTotal.innerHTML = 'Total: ' + calculateTotal(playerCards);
-    
-            // Disable button after revealing
-            revealBtn.disabled = true;
-        };
-    
-        playerCardsDiv.appendChild(revealBtn);
     }
     
+    function showAllCards(player) {
+        const playerCards = player === 1 ? player1Cards : player2Cards;
+        const playerTotal = document.getElementById(`player${player}-total`);
+        const playerCardsDiv = document.getElementById(`player${player}-cards`);
+    
+        playerCardsDiv.innerHTML = ''; // Clear existing cards
+    
+        playerCards.forEach(card => {
+            const cardElement = document.createElement('div');
+            cardElement.classList.add('card');
+    
+            if (card.suit === '♥' || card.suit === '♦') {
+                cardElement.classList.add('red');
+            } else {
+                cardElement.classList.add('black');
+            }
+    
+            cardElement.innerHTML = `
+                <span class="top-left">${card.value}</span>
+                <span class="suit">${card.suit}</span>
+                <span class="bottom-right">${card.value}</span>
+            `;
+    
+            playerCardsDiv.appendChild(cardElement);
+        });
+    
+        playerTotal.innerHTML = 'Total: ' + calculateTotal(playerCards);
+    }
     
 
 
@@ -231,52 +235,79 @@ const startButton = document.getElementById('start-btn');
 
     function declareImmediateWinner(player) {
         resultText.innerHTML = `🎉 Player ${player} Wins with 9!`;
+
+        if (player1Total === 9 && player2Total === 9) {
+            resultText.innerHTML = `🤝 It's a Tie! Both players have 9!`;
+        } else if (player1Total === 9) {
+            resultText.innerHTML = `🎉 Player 1 Wins with 9!`;
+            player1Score++;
+        } else if (player2Total === 9) {
+            resultText.innerHTML = `🎉 Player 2 Wins with 9!`;
+            player2Score++;
+        }
+
+
         resultText.classList.add('winner');
 
+        
+    
         if (player === 1) {
-            player1Score++; // Increase Player 1 score
+            player1Score++; 
         } else {
-            player2Score++; // Increase Player 2 score
+            player2Score++; 
         }
-        updateScoreDisplay(); // Update UI
-
+        
+        updateScoreDisplay(); 
         disableAllButtons();
-
-        // Show Continue button for the next round
+    
+        // ✅ Re-enable Start and Continue buttons
+        startButton.disabled = false;
         document.getElementById('continue-btn').style.display = 'inline-block';
+        document.getElementById('continue-btn').disabled = false;
+    
+        // ✅ Reset game state
+        gameInProgress = false;
     }
+    
+    
 
     function determineWinner() {
         const player1Total = calculateTotal(player1Cards);
         const player2Total = calculateTotal(player2Cards);
-
-        if (player1Total > player2Total) {
+    
+        if (player1Total === player2Total) {
+            resultText.innerHTML = '🤝 It\'s a Tie!';
+        } else if (player1Total > player2Total) {
             resultText.innerHTML = '🎉 Player 1 Wins!';
             resultText.classList.add('winner');
             player1Score++;
-        } else if (player2Total > player1Total) {
+        } else {
             resultText.innerHTML = '🎉 Player 2 Wins!';
             resultText.classList.add('winner');
             player2Score++;
-        } else if (player1Total === player2Total) {  
-            resultText.innerHTML = '🤝 It\'s a Tie!';
-            resultText.classList.add('loser');
         }
-
+    
         updateScoreDisplay();
         disableAllButtons();
-
-        // Show Continue button for the next round
+    
+        // Re-enable Start and Continue buttons
+        startButton.disabled = false;
         document.getElementById('continue-btn').style.display = 'inline-block';
+        document.getElementById('continue-btn').disabled = false;
+    
+        gameInProgress = false; // Mark game as ended
     }
-
-
+    
 
     function startGame(isNewGame = true) {
         if (gameInProgress) return;
 
-        clearTimeout(turnTimer); // Reset timer on new game
+        gameInProgress = true; // Set game in progress
+        startButton.disabled = true; // Disable Start Game button
+
+        clearTimeout(turnTimer);
         document.getElementById('continue-btn').style.display = 'none';
+
         const loading = document.getElementById('loading');
         loading.style.display = 'block';
 
@@ -315,14 +346,12 @@ const startButton = document.getElementById('start-btn');
             shuffledDeck = shuffleDeck([...deck]);
             player1Cards = [];
             player2Cards = [];
-            resultText.innerHTML = '';
-            resultText.classList.remove('winner', 'loser');
-            document.getElementById('player1-cards').innerHTML = '<div class="card-back"></div><div class="card-back"></div>';
-            document.getElementById('player2-cards').innerHTML = '<div class="card-back"></div><div class="card-back"></div>';
-            document.getElementById('player1-total').innerHTML = 'Total: ?';
-            document.getElementById('player2-total').innerHTML = 'Total: ?';
-            setTimeout(() => {
 
+            resultText.innerHTML = '';
+
+            resultText.classList.remove('winner', 'loser');
+            
+            setTimeout(() => {
             document.getElementById('player1-cards').innerHTML = '<div class="card-back"></div><div class="card-back"></div>';
             document.getElementById('player2-cards').innerHTML = '<div class="card-back"></div><div class="card-back"></div>';
             document.getElementById('player1-total').innerHTML = 'Total: ?';
@@ -367,8 +396,7 @@ const startButton = document.getElementById('start-btn');
             document.getElementById('player1').classList.add('active');
             document.getElementById('player2').classList.remove('active');
             player1Turn = true;
-            gameInProgress = true;
-        }, 3000); // Reveal cards after 3 seconds
+        }, 1000); // Reveal cards after 3 seconds
     }, 2000); // Shuffle animation lasts 2 seconds
     }
 
@@ -401,4 +429,3 @@ const startButton = document.getElementById('start-btn');
         document.getElementById('hit-btn-2').disabled = true;
         document.getElementById('stand-btn-2').disabled = true;
     }
-
