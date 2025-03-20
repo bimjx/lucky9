@@ -106,6 +106,7 @@ function calculateTotal(hand) {
     return sum % 10;
 }
 
+
 function displayPlayerCards(player) {
     const playerCards = player === 1 ? player1Cards : player2Cards;
     const playerTotal = document.getElementById(`player${player}-total`);
@@ -122,31 +123,60 @@ function displayPlayerCards(player) {
         }
         playerTotal.innerHTML = 'Total: ?';
 
-        disableAllButtons()
-        // Reveal button to show initial two cards
-        const revealBtn = document.createElement('button');
-        revealBtn.textContent = 'Reveal Cards';
-        revealBtn.classList.add('reveal-btn');
-        revealBtn.onclick = () => {
-            showAllCards(player);
-            revealBtn.disabled = true; // Disable button after use
-            console.log('pumasok sya')
+        disableAllButtons();  // Disable all buttons when displaying cards
 
-            document.getElementById(`hit-btn-${player}`).disabled = false;
-            document.getElementById(`stand-btn-${player}`).disabled = false;
-        };
-        playerCardsDiv.appendChild(revealBtn);
+        // Reveal button for Player 1
+        if (player === 1) {
+            const revealBtn = document.createElement('button');
+            revealBtn.textContent = 'Reveal Cards';
+            revealBtn.classList.add('reveal-btn');
+            revealBtn.onclick = () => {
+                showAllCards(player);
+                revealBtn.disabled = true; // Disable button after use
+                console.log('pumasok sya');
+                
+                document.getElementById(`hit-btn-${player}`).disabled = false;
+                document.getElementById(`stand-btn-${player}`).disabled = false;
+            };
+            playerCardsDiv.appendChild(revealBtn);
+        }
+
+        // Reveal button for Player 2 (Initially disabled)
+        if (player === 2) {
+            const revealBtnPlayer2 = document.createElement('button');
+            revealBtnPlayer2.textContent = 'Reveal Cards';
+            revealBtnPlayer2.classList.add('reveal-btn');
+            revealBtnPlayer2.disabled = true; // Disable for Player 2 initially
+            revealBtnPlayer2.onclick = () => {
+                showAllCards(2);
+                revealBtnPlayer2.disabled = true; // Disable button after use
+                document.getElementById('hit-btn-2').disabled = false;
+                document.getElementById('stand-btn-2').disabled = false;
+            };
+            playerCardsDiv.appendChild(revealBtnPlayer2);
+        }
     } else {
         // If third card is drawn, reveal all three automatically
         showAllCards(player);
     }
+
+
+    if (player === 1) {
+        setTimeout(() => {
+            // Enable Player 2's reveal button only when Player 1 has finished their turn
+            document.getElementById('hit-btn-2').disabled = true;
+            document.getElementById('stand-btn-2').disabled = true;
+            const revealBtnPlayer2 = document.querySelector('.reveal-btn');
+            if (revealBtnPlayer2) revealBtnPlayer2.disabled = false; // Enable the reveal button
+        }, 500); // Small delay for smooth transition
+    }
 }
+
 
 function showAllCards(player) {
     const playerCards = player === 1 ? player1Cards : player2Cards;
     const playerTotal = document.getElementById(`player${player}-total`);
     const playerCardsDiv = document.getElementById(`player${player}-cards`);
-
     playerCardsDiv.innerHTML = ''; // Clear existing cards
 
     playerCards.forEach(card => {
@@ -192,6 +222,11 @@ function hit(player) {
         document.getElementById('player1').classList.remove('active');
         document.getElementById('player2').classList.add('active');
 
+        // Enable Player 2's reveal button after Player 1 has completed their turn
+        setTimeout(() => {
+            enablePlayer2RevealButton();
+        }, 500); // Slight delay for visual effect
+
         setTimeout(() => {
             hit(2); // Force Player 2 to hit
         }, 1000); // Slight delay for visual effect
@@ -200,6 +235,8 @@ function hit(player) {
 
     if ((player === 1 && total === 9) && (player === 2 && total === 9)) {
         // If Player 2 hits and also reaches 9, it's a tie
+        showAllCards(player);
+        revealBtn.disabled = true;
         resultText.innerHTML = '🤝 It\'s a Tie!';
         resultText.classList.add('loser');
         updateScoreDisplay();
@@ -208,12 +245,24 @@ function hit(player) {
         return;
     }
 
+    console.log("playercard len: ", playerCards.length);
+    console.log("player: ", player);
+
     if (playerCards.length === 3) {
         stand(player);
     } else {
         startTurnTimer(player);
     }
 }
+
+// Function to enable Player 2's reveal button
+function enablePlayer2RevealButton() {
+    const revealBtnPlayer2 = document.querySelector('.reveal-btn');
+    if (revealBtnPlayer2) {
+        revealBtnPlayer2.disabled = false;  // Enable the reveal button for Player 2
+    }
+}
+
 
 
 function startTurnTimer(player) {
@@ -222,43 +271,41 @@ function startTurnTimer(player) {
         stand(player); // Auto-stand if time runs out
     }, TURN_TIME_LIMIT);
 }
+
 function stand(player) {
     clearTimeout(turnTimer); // Clear timer when player stands
 
     if (player === 1) {
         document.getElementById('hit-btn-1').disabled = true;
         document.getElementById('stand-btn-1').disabled = true;
-        document.getElementById('hit-btn-2').disabled = false;
-        document.getElementById('stand-btn-2').disabled = false;
+        document.getElementById('hit-btn-2').disabled = true; 
+        document.getElementById('stand-btn-2').disabled = true;
         document.getElementById('player1').classList.remove('active');
         document.getElementById('player2').classList.add('active');
-        startTurnTimer(2);
+        
+        // Enable Player 2's reveal button after Player 1 stands
+        setTimeout(() => {
+            enablePlayer2RevealButton();
+        }, 500); // Small delay for smooth transition
+
+        startTurnTimer(2); // Start Player 2's turn
     } else {
         determineWinner();
     }
 }
 
 function declareImmediateWinner(player) {
+    // Display the result based on the total
     resultText.innerHTML = `🎉 Player ${player} Wins with 9!`;
 
-    let player1Total;
-    let player2Total;
+    // Show all cards for both players
+    showAllCards(1);
+    showAllCards(2);
 
-    if (player1Total === 9 && player2Total === 9) {
-        resultText.innerHTML = `🤝 It's a Tie! Both players have 9!`;
-    } else if (player1Total === 9) {
-        resultText.innerHTML = `🎉 Player 1 Wins with 9!`;
-        player1Score++;
-    } else if (player2Total === 9) {
-        resultText.innerHTML = `🎉 Player 2 Wins with 9!`;
-        player2Score++;
-    }
+    // Disable all buttons since the game has ended
+    disableAllButtons();
 
-
-    resultText.classList.add('winner');
-
-
-
+    // Update the score based on the winner
     if (player === 1) {
         player1Score++;
     } else {
@@ -266,16 +313,61 @@ function declareImmediateWinner(player) {
     }
 
     updateScoreDisplay();
-    disableAllButtons();
 
-    // ✅ Re-enable Start and Continue buttons
+    // Re-enable the start and continue buttons for the next round
     startButton.disabled = false;
     document.getElementById('continue-btn').style.display = 'inline-block';
     document.getElementById('continue-btn').disabled = false;
 
-    // ✅ Reset game state
-    gameInProgress = false;
+    gameInProgress = false; // Mark game as ended
 }
+
+
+// function declareImmediateWinner(player) {
+//     resultText.innerHTML = `🎉 Player ${player} Wins with 9!`;
+
+//     let player1Total;
+//     let player2Total;
+//     console.log("total1: ",player1Total)
+//     console.log("total2: ",player2Total)
+//     if (player1Total === 9 && player2Total === 9) {
+//         resultText.innerHTML = `🤝 It's a Tie! Both players have 9!`;
+//         showAllCards(player);
+//         disableAllButtons();
+//     } else if (player1Total === 9) {
+//         showAllCards(player);
+//         resultText.innerHTML = `🎉 Player 1 Wins with 9!`;
+//         disableAllButtons();
+//         player1Score++;
+//     } else if (player2Total === 9) {
+//         showAllCards(player);
+//         resultText.innerHTML = `🎉 Player 2 Wins with 9!`;
+//         disableAllButtons();
+//         player2Score++;
+//     }
+
+
+//     resultText.classList.add('winner');
+
+
+
+//     if (player === 1) {
+//         player1Score++;
+//     } else {
+//         player2Score++;
+//     }
+
+//     updateScoreDisplay();
+//     disableAllButtons();
+
+//     // ✅ Re-enable Start and Continue buttons
+//     startButton.disabled = false;
+//     document.getElementById('continue-btn').style.display = 'inline-block';
+//     document.getElementById('continue-btn').disabled = false;
+
+//     // ✅ Reset game state
+//     gameInProgress = false;
+// }
 
 
 
