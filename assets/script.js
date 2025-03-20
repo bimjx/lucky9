@@ -160,7 +160,7 @@ function displayPlayerCards(player) {
         showAllCards(player);
     }
 
-
+    // Only enable Player 2's "Reveal Cards" button once Player 1 has finished their turn
     if (player === 1) {
         setTimeout(() => {
             // Enable Player 2's reveal button only when Player 1 has finished their turn
@@ -295,7 +295,10 @@ function stand(player) {
 }
 
 function declareImmediateWinner(player) {
-    // Display the result based on the total
+    // Get the result container
+    const resultText = document.getElementById('result');
+
+    // Display the result based on the winner
     resultText.innerHTML = `🎉 Player ${player} Wins with 9!`;
 
     // Show all cards for both players
@@ -314,6 +317,16 @@ function declareImmediateWinner(player) {
 
     updateScoreDisplay();
 
+    // Show the result
+    resultText.style.opacity = 1;
+    resultText.style.visibility = 'visible';
+
+    // Hide the result after 3 seconds (3000 milliseconds)
+    setTimeout(() => {
+        resultText.style.opacity = 0;
+        resultText.style.visibility = 'hidden';
+    }, 3000); // Result fades out after 3 seconds
+
     // Re-enable the start and continue buttons for the next round
     startButton.disabled = false;
     document.getElementById('continue-btn').style.display = 'inline-block';
@@ -321,6 +334,7 @@ function declareImmediateWinner(player) {
 
     gameInProgress = false; // Mark game as ended
 }
+
 
 
 // function declareImmediateWinner(player) {
@@ -375,6 +389,10 @@ function determineWinner() {
     const player1Total = calculateTotal(player1Cards);
     const player2Total = calculateTotal(player2Cards);
 
+    // Get the result container
+    const resultText = document.getElementById('result');
+
+    // Check the winner and set the message
     if (player1Total === player2Total) {
         resultText.innerHTML = '🤝 It\'s a Tie!';
     } else if (player1Total > player2Total) {
@@ -387,6 +405,16 @@ function determineWinner() {
         player2Score++;
     }
 
+    // Show the result
+    resultText.style.opacity = 1;
+    resultText.style.visibility = 'visible';
+
+    // Hide the result after 3 seconds
+    setTimeout(() => {
+        resultText.style.opacity = 0;
+        resultText.style.visibility = 'hidden';
+    }, 3000); // 3 seconds duration
+
     updateScoreDisplay();
     disableAllButtons();
 
@@ -397,6 +425,7 @@ function determineWinner() {
 
     gameInProgress = false; // Mark game as ended
 }
+
 
 
 function startGame(isNewGame = true) {
