@@ -100,18 +100,18 @@ function shuffleDeck(deck) {
     return deck;
 }
 
-// Calculate hand total
-// function calculateTotal(hand) {
-//     // const sum = hand.reduce((total, card) => total + cardValues[card.value], 0);
-//     // return sum % 10;
-
-// }
-
-// Calculate hand total (forced to 9 for debugging)
+//Calculate hand total
 function calculateTotal(hand) {
-    let total = hand.reduce((sum, card) => sum + cardValues[card.value], 0);
-    return 9; // Force the total to 9 for debugging
+    const sum = hand.reduce((total, card) => total + cardValues[card.value], 0);
+    return sum % 10;
+
 }
+
+// // Calculate hand total (forced to 9 for debugging)
+// function calculateTotal(hand) {
+//     let total = hand.reduce((sum, card) => sum + cardValues[card.value], 0);
+//     return 9; // Force the total to 9 for debugging
+// }
 
 
 function displayPlayerCards(player) {
@@ -301,7 +301,6 @@ function stand(player) {
         determineWinner();
     }
 }
-
 function declareImmediateWinner(player) {
     console.log("pumasok");
     // Get the result container
@@ -326,9 +325,32 @@ function declareImmediateWinner(player) {
     setTimeout(() => {
         let player1Total = calculateTotal(player1Cards);
         let player2Total = calculateTotal(player2Cards);
-        // Display the result based on the winner
-        if (player1Total === player2Total) {
-            resultText.innerHTML = `🎉 Player ${player} Wins with 9!`;
+
+        // Check if both players have a total of 9
+        if (player1Total === 9 && player2Total === 9) {
+            resultText.innerHTML = `It's a tie! Both players have a total of 9!`;
+
+            // Show the result
+            resultText.style.opacity = 1;
+            resultText.style.visibility = 'visible';
+
+            setTimeout(() => {
+                resultText.style.opacity = 0;
+                resultText.style.visibility = 'hidden';
+            }, 3000);
+        } else if (player1Total === 9) {
+            resultText.innerHTML = `🎉 Player 1 Wins with ${player1Total}!`;
+
+            // Show the result
+            resultText.style.opacity = 1;
+            resultText.style.visibility = 'visible';
+
+            setTimeout(() => {
+                resultText.style.opacity = 0;
+                resultText.style.visibility = 'hidden';
+            }, 3000);
+        } else if (player2Total === 9) {
+            resultText.innerHTML = `🎉 Player 2 Wins with ${player2Total}!`;
 
             // Show the result
             resultText.style.opacity = 1;
@@ -339,7 +361,6 @@ function declareImmediateWinner(player) {
                 resultText.style.visibility = 'hidden';
             }, 3000);
         }
-        // Result fades out after 3 seconds
 
         // Re-enable the start and continue buttons for the next round
         startButton.disabled = false;
@@ -349,6 +370,54 @@ function declareImmediateWinner(player) {
         gameInProgress = false; // Mark game as ended
     }, 3000); // 3-second delay before showing the result
 }
+
+// function declareImmediateWinner(player) {
+//     console.log("pumasok");
+//     // Get the result container
+//     const resultText = document.getElementById('result');
+
+//     // Show all cards for both players
+//     showAllCards(1);
+//     showAllCards(2);
+
+//     // Disable all buttons since the game has ended
+//     disableAllButtons();
+
+//     // Update the score based on the winner
+//     if (player === 1) {
+//         player1Score++;
+//     } else {
+//         player2Score++;
+//     }
+
+//     updateScoreDisplay();
+//     // Add a delay before showing the result
+//     setTimeout(() => {
+//         let player1Total = calculateTotal(player1Cards);
+//         let player2Total = calculateTotal(player2Cards);
+//         // Display the result based on the winner
+//         if (player1Total === player2Total) {
+//             resultText.innerHTML = `🎉 Player ${player} Wins with 9!`;
+
+//             // Show the result
+//             resultText.style.opacity = 1;
+//             resultText.style.visibility = 'visible';
+
+//             setTimeout(() => {
+//                 resultText.style.opacity = 0;
+//                 resultText.style.visibility = 'hidden';
+//             }, 3000);
+//         }
+//         // Result fades out after 3 seconds
+
+//         // Re-enable the start and continue buttons for the next round
+//         startButton.disabled = false;
+//         document.getElementById('continue-btn').style.display = 'inline-block';
+//         document.getElementById('continue-btn').disabled = false;
+
+//         gameInProgress = false; // Mark game as ended
+//     }, 3000); // 3-second delay before showing the result
+// }
 
 
 
