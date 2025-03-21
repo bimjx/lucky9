@@ -101,9 +101,16 @@ function shuffleDeck(deck) {
 }
 
 // Calculate hand total
+// function calculateTotal(hand) {
+//     // const sum = hand.reduce((total, card) => total + cardValues[card.value], 0);
+//     // return sum % 10;
+
+// }
+
+// Calculate hand total (forced to 9 for debugging)
 function calculateTotal(hand) {
-    const sum = hand.reduce((total, card) => total + cardValues[card.value], 0);
-    return sum % 10;
+    let total = hand.reduce((sum, card) => sum + cardValues[card.value], 0);
+    return 9; // Force the total to 9 for debugging
 }
 
 
@@ -134,7 +141,7 @@ function displayPlayerCards(player) {
                 showAllCards(player);
                 revealBtn.disabled = true; // Disable button after use
                 console.log('pumasok sya');
-                
+
                 document.getElementById(`hit-btn-${player}`).disabled = false;
                 document.getElementById(`stand-btn-${player}`).disabled = false;
             };
@@ -242,6 +249,7 @@ function hit(player) {
         updateScoreDisplay();
         disableAllButtons();
         document.getElementById('continue-btn').style.display = 'inline-block';
+
         return;
     }
 
@@ -278,11 +286,11 @@ function stand(player) {
     if (player === 1) {
         document.getElementById('hit-btn-1').disabled = true;
         document.getElementById('stand-btn-1').disabled = true;
-        document.getElementById('hit-btn-2').disabled = true; 
+        document.getElementById('hit-btn-2').disabled = true;
         document.getElementById('stand-btn-2').disabled = true;
         document.getElementById('player1').classList.remove('active');
         document.getElementById('player2').classList.add('active');
-        
+
         // Enable Player 2's reveal button after Player 1 stands
         setTimeout(() => {
             enablePlayer2RevealButton();
@@ -295,11 +303,9 @@ function stand(player) {
 }
 
 function declareImmediateWinner(player) {
+    console.log("pumasok");
     // Get the result container
     const resultText = document.getElementById('result');
-
-    // Display the result based on the winner
-    resultText.innerHTML = `🎉 Player ${player} Wins with 9!`;
 
     // Show all cards for both players
     showAllCards(1);
@@ -316,24 +322,34 @@ function declareImmediateWinner(player) {
     }
 
     updateScoreDisplay();
-
-    // Show the result
-    resultText.style.opacity = 1;
-    resultText.style.visibility = 'visible';
-
-    // Hide the result after 3 seconds (3000 milliseconds)
+    // Add a delay before showing the result
     setTimeout(() => {
-        resultText.style.opacity = 0;
-        resultText.style.visibility = 'hidden';
-    }, 3000); // Result fades out after 3 seconds
+        let player1Total = calculateTotal(player1Cards);
+        let player2Total = calculateTotal(player2Cards);
+        // Display the result based on the winner
+        if (player1Total === player2Total) {
+            resultText.innerHTML = `🎉 Player ${player} Wins with 9!`;
 
-    // Re-enable the start and continue buttons for the next round
-    startButton.disabled = false;
-    document.getElementById('continue-btn').style.display = 'inline-block';
-    document.getElementById('continue-btn').disabled = false;
+            // Show the result
+            resultText.style.opacity = 1;
+            resultText.style.visibility = 'visible';
 
-    gameInProgress = false; // Mark game as ended
+            setTimeout(() => {
+                resultText.style.opacity = 0;
+                resultText.style.visibility = 'hidden';
+            }, 3000);
+        }
+        // Result fades out after 3 seconds
+
+        // Re-enable the start and continue buttons for the next round
+        startButton.disabled = false;
+        document.getElementById('continue-btn').style.display = 'inline-block';
+        document.getElementById('continue-btn').disabled = false;
+
+        gameInProgress = false; // Mark game as ended
+    }, 3000); // 3-second delay before showing the result
 }
+
 
 
 
@@ -392,8 +408,9 @@ function determineWinner() {
     // Get the result container
     const resultText = document.getElementById('result');
 
+
     // Check the winner and set the message
-    if (player1Total === player2Total) {
+    if (player1Total == player2Total) {
         resultText.innerHTML = '🤝 It\'s a Tie!';
     } else if (player1Total > player2Total) {
         resultText.innerHTML = '🎉 Player 1 Wins!';
@@ -435,6 +452,7 @@ function startGame(isNewGame = true) {
     clearTimeout(turnTimer);
     // startTurnTimer(player);
     document.getElementById('continue-btn').style.display = 'none';
+    document.getElementById('iconx').style.display = 'none';
 
     const loading = document.getElementById('loading');
     loading.style.display = 'block';
@@ -511,12 +529,15 @@ function startGame(isNewGame = true) {
             let player1Total = calculateTotal(player1Cards);
             let player2Total = calculateTotal(player2Cards);
 
+
             if (player1Total === 9) {
                 declareImmediateWinner(1);
                 return;
             } else if (player2Total === 9) {
                 declareImmediateWinner(2);
                 return;
+            } else if (player1Total === player2Total) {
+                declareImmediateWinner
             }
 
 
