@@ -426,8 +426,6 @@ function determineWinner() {
     gameInProgress = false; // Mark game as ended
 }
 
-
-
 function startGame(isNewGame = true) {
     if (gameInProgress) return;
 
@@ -435,6 +433,7 @@ function startGame(isNewGame = true) {
     startButton.disabled = true; // Disable Start Game button
 
     clearTimeout(turnTimer);
+    // startTurnTimer(player);
     document.getElementById('continue-btn').style.display = 'none';
 
     const loading = document.getElementById('loading');
